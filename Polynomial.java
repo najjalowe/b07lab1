@@ -1,6 +1,8 @@
 import java.io.File;
 import java.io.BufferedReader;
 import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
 
 public class Polynomial{
     double [] nonzero;
@@ -23,7 +25,7 @@ public class Polynomial{
         }
     }
 
-    public Polynomial(File f){
+    public Polynomial(File f)throws IOException{
         BufferedReader input = new BufferedReader(new FileReader(f));
 		String p = input.readLine();
         String[] pArray = p.split("(?=[+-])");//separate into exp and value pairs including sign
@@ -33,7 +35,7 @@ public class Polynomial{
 
         for (String elem : pArray) {
             String[] elemArray = elem.split("[x]");
-            nonzero[i]= parseDouble(elemArray[0]);
+            nonzero[i]= Double.parseDouble(elemArray[0]);
             if(!(elem.contains("x"))){
                 exponent[i]=0;// a constant
             }
@@ -41,10 +43,11 @@ public class Polynomial{
                 exponent[i]=1;//exponent is 1
             }
             else{
-                exponent[i] = parseInt(elemArray[1]);
+                exponent[i] = Integer.parseInt(elemArray[1]);
             }
             i++;
         }
+        input.close();
     }
 
     public int countexp(Polynomial p, Polynomial q){//counts # distinct exponents of two polynomial
@@ -53,14 +56,16 @@ public class Polynomial{
         int j=0;
         int k=0;
         int count =0;
-        for(int i =0;i<max(pLastExp,qLastExp);i++){
-            if(p.exponent[j]==i){
-                j++;
-                count++;
-                if(q.exponent[k]==i)
-                    k++;
+        for(int i=0;i<=Math.max(pLastExp,qLastExp);i++){
+            if(j<p.exponent.length){
+                if(p.exponent[j]==i){
+                    j++;
+                    count++;
+                    if(k<q.exponent.length&&q.exponent[k]==i)
+                        k++;
+                }
             }
-            else if(q.exponent[k]==i){
+            if(k<q.exponent.length&&q.exponent[k]==i){
                 k++;
                 count++;
             }
@@ -79,17 +84,17 @@ public class Polynomial{
         int x=0;//track index of input arrays
         int y=0;//track index of p
         int z=0;//track index of the calling object; this
-        for(int i=0; i<=max(pLastExp,thisLastExp); i++){
+        for(int i=0; i<=Math.max(pLastExp,thisLastExp); i++){
             double sum=0;
-            if(p.exponent[y]==i){
+            if(y<p.exponent.length&&p.exponent[y]==i){
                  sum = sum+p.nonzero[y];
                  y++;
-                 if(this.exponent[z]==i){
+                 if(z<this.exponent.length&&this.exponent[z]==i){
                     sum = sum+this.nonzero[z];
                     z++;
                  } 
             }
-            else if(this.exponent[z]==i){
+            else if(z<this.exponent.length&&this.exponent[z]==i){
                 sum = sum+this.nonzero[z];
                 z++;
             }
@@ -132,24 +137,24 @@ public class Polynomial{
         return sum;
     }
 
-    public saveToFile(String fileName){
+    public void saveToFile(String fileName)throws IOException{
         File f = new File(fileName);
-        file.createNewFile();
+        f.createNewFile();
         FileWriter output = new FileWriter(fileName);
         String polynomial = new String();
         String convert = new String();
         for(int i = 0; i<this.exponent.length; i++){
             if(this.exponent[i]==0){//if constant
-                convert = Integer.toString(this.nonzero[0]);
+                convert = Double.toString(this.nonzero[0]);
             }
             else if(this.exponent[i]==1){// if exp = 1
-                convert = Integer.toString(this.nonzero[0]).concat("x");
+                convert = Double.toString(this.nonzero[0]).concat("x");
 
             }
             else{
-                convert = Integer.toString(this.nonzero[0]).concat("x").concat(Integer.toString(this.exponent[i]));
+                convert = Double.toString(this.nonzero[0]).concat("x").concat(Integer.toString(this.exponent[i]));
             }
-            polynomial.concat(convert);
+            polynomial = polynomial.concat(convert);
         }
         output.write(polynomial);
         output.close();
